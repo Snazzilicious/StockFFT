@@ -4,6 +4,8 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <random>
+#include <ctime>
 
 void readIn(std::vector<double>& fillWithData, std::string fileName);
 
@@ -18,15 +20,16 @@ int main() {
 	readIn(inData, inputFile);
 
 	int inSize = inData.size();
-/*
-	for (int i = 0; i < inSize; i++){
-		std::cout << inData[i] << std::endl;
-	}*/
+
 
 	//DFT 32? points at a time to get 10-20 profiles
 
 	//randomly select coeficients
+	std::uniform_int_distribution<int> dist(0,45);
+	std::mt19937_64 gen( std::time(NULL) );
 
+
+	std::cout << dist( gen );
 	//rebuild curves then average
 
 	//fit to original data
