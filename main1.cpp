@@ -18,10 +18,10 @@ int main() {
 	readIn(inData, inputFile);
 
 	int inSize = inData.size();
-
+/*
 	for (int i = 0; i < inSize; i++){
 		std::cout << inData[i] << std::endl;
-	}
+	}*/
 
 	//DFT 32? points at a time to get 10-20 profiles
 
