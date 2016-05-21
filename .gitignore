@@ -2,4 +2,4 @@ Debug/
 *.txt
 *.project
 *.cproject
-./settings/
+.settings/
