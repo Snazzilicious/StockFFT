@@ -23,7 +23,7 @@ public:
 
 		double magnitude = this->getMagnitude();
 
-		for (size_t i = 0; i < this->size(); i++){
+		for (unsigned int i = 0; i < this->size(); i++){
 			this->operator[](i) = this->operator[](i) / magnitude;
 		}
 
@@ -35,7 +35,7 @@ public:
 
 		double sum = 0.0;
 
-		for (size_t i = 0; i < this->size(); i++){
+		for (unsigned int i = 0; i < this->size(); i++){
 			sum += this->operator[](i)*this->operator[](i);
 		}
 
