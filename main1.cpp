@@ -12,10 +12,11 @@
 
 void readIn(std::vector<double>& fillWithData, std::string fileName);
 double average(std::vector<double> data);
-
+void reverse( std::vector<double>& data );
 
 int main() {
 
+	const unsigned int PROFILE_SIZE = 4;
 
 
 	//load in data
@@ -23,14 +24,26 @@ int main() {
 	std::vector<double> inData;
 
 	readIn(inData, inputFile);
+	reverse( inData );
+	double avg = average( inData );
 
-
-
+	//subtract average
+	for(size_t i=0; i < inData.size(); i++){
+		inData[i] -= avg;
+		//std::cout << inData[i] << std::endl;
+	}
 
 
 	//DFT 32? points at a time to get 10-20 profiles
-	std::vector<MathVector> DFTData = DFT::DFT( inData );
+	std::vector< std::vector<MathVector> > profiles;
 
+	for (unsigned int i = 0; i + PROFILE_SIZE < inData.size() + 1; i += 1){
+		std::vector<double>::const_iterator first = inData.begin() + i;
+		std::vector<double>::const_iterator last = inData.begin() + i + PROFILE_SIZE;
+		std::vector<double> section(first, last);
+
+		profiles.push_back( DFT::DFT( section ) );
+	}
 
 	//randomly select coefficients
 	std::uniform_int_distribution<int> dist(0,45);
@@ -40,6 +53,7 @@ int main() {
 	std::cout << dist( gen ) << std::endl;
 
 
+	std::vector<MathVector> DFTData = DFT::DFT( inData );
 	//rebuild curves then average
 	std::vector<double> inverse = DFT::IDFT(DFTData);
 
@@ -86,4 +100,16 @@ double average(std::vector<double> data){
 	}
 
 	return sum / data.size();
+}
+
+
+void reverse( std::vector<double>& data ){
+
+	int i,j;
+	for (i=0,j=data.size()-1; i < j; i++, j--){
+		double temp = data[i];
+		data[i] = data[j];
+		data[j] = temp;
+	}
+
 }
