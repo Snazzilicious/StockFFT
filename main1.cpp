@@ -17,7 +17,7 @@ void reverse( std::vector<double>& data );
 int main() {
 
 	const unsigned int PROFILE_SIZE = 4;
-
+	const unsigned int NUM_PREDICTIONS = 100;
 
 	//load in data
 	std::string inputFile = "input.txt";
@@ -46,20 +46,36 @@ int main() {
 	}
 
 	//randomly select coefficients
-	std::uniform_int_distribution<int> dist(0,45);
+	std::uniform_int_distribution<int> dist(0, profiles.size() );
 	std::mt19937_64 gen( std::time(NULL) );
 
+	std::vector< std::vector<double> > allPredictions;
+
+	for (unsigned int i = 0; i < NUM_PREDICTIONS; i++){
+
+		std::vector<MathVector> builtProfile;
+
+		for (unsigned int j = 0; j < PROFILE_SIZE; j++){
+			int cosIndex = dist( gen );
+			int sinIndex = dist( gen );
+			//select sin and cosine coefficients
+			MathVector cosSin(2,0.0);
+			cosSin[0] = profiles[cosIndex][j][0];
+			cosSin[0] = profiles[sinIndex][j][1];
+
+			//store them
+			builtProfile.push_back( cosSin );
+		}
+		//stores inverse transform of the constructed
+		allPredictions.push_back( DFT::IDFT(builtProfile) );
+		builtProfile.clear();
+	}
 
 	std::cout << dist( gen ) << std::endl;
 
 
-	std::vector<MathVector> DFTData = DFT::DFT( inData );
 	//rebuild curves then average
-	std::vector<double> inverse = DFT::IDFT(DFTData);
 
-	for (unsigned int i = 0; i < inverse.size(); i++){
-		std::cout << inverse[i] << std::endl;
-	}
 
 	//fit to original data
 
