@@ -13,16 +13,19 @@
 void readIn(std::vector<double>& fillWithData, std::string fileName);
 double average(std::vector<double> data);
 void reverse( std::vector<double>& data );
+double yOffset(std::vector<double> x, std::vector<double> y);
+double OffsetScore(std::vector<double> x, std::vector<double> y);
+
 
 int main() {
 
 	const unsigned int PROFILE_SIZE = 4;
 	const unsigned int NUM_PREDICTIONS = 100;
 
-	//load in data
+
 	std::string inputFile = "input.txt";
 	std::vector<double> inData;
-
+	//load in data and reverse
 	readIn(inData, inputFile);
 	reverse( inData );
 	double avg = average( inData );
@@ -34,9 +37,9 @@ int main() {
 	}
 
 
-	//DFT 32? points at a time to get 10-20 profiles
-	std::vector< std::vector<MathVector> > profiles;
 
+	std::vector< std::vector<MathVector> > profiles;
+	//analyze all data one subvector at a time
 	for (unsigned int i = 0; i + PROFILE_SIZE < inData.size() + 1; i += 1){
 		std::vector<double>::const_iterator first = inData.begin() + i;
 		std::vector<double>::const_iterator last = inData.begin() + i + PROFILE_SIZE;
@@ -45,12 +48,13 @@ int main() {
 		profiles.push_back( DFT::DFT( section ) );
 	}
 
-	//randomly select coefficients
+
 	std::uniform_int_distribution<int> dist(0, profiles.size() );
 	std::mt19937_64 gen( std::time(NULL) );
 
 	std::vector< std::vector<double> > allPredictions;
 
+	//builds random profiles to inverse
 	for (unsigned int i = 0; i < NUM_PREDICTIONS; i++){
 
 		std::vector<MathVector> builtProfile;
@@ -61,24 +65,62 @@ int main() {
 			//select sin and cosine coefficients
 			MathVector cosSin(2,0.0);
 			cosSin[0] = profiles[cosIndex][j][0];
-			cosSin[0] = profiles[sinIndex][j][1];
+			cosSin[1] = profiles[sinIndex][j][1];
 
 			//store them
 			builtProfile.push_back( cosSin );
 		}
-		//stores inverse transform of the constructed
+		//stores inverse transform of the constructed profile
 		allPredictions.push_back( DFT::IDFT(builtProfile) );
 		builtProfile.clear();
 	}
 
-	std::cout << dist( gen ) << std::endl;
+	std::vector<double> scores;
+	std::vector<int> offsets;
+	//fit allPredictions to original data
+	for (unsigned int i = 0; i < NUM_PREDICTIONS; i++) {
+		//select an offset
+		double score = 0.0;
+		int bestOffset = 5;
+		for (unsigned int offset = 5; offset < PROFILE_SIZE - 5; offset++){
 
+			//get subvectors
+			std::vector<double>::const_iterator Data1 = inData.end();
+			std::vector<double>::const_iterator Data2 = inData.end() - offset;
+			std::vector<double> trueVals(Data1, Data2);
 
-	//rebuild curves then average
+			std::vector<double>::const_iterator Pred1 = allPredictions[i].end();
+			std::vector<double>::const_iterator Pred2 = allPredictions[i].end() - offset;
+			std::vector<double> predVals(Pred1, Pred2);
 
+			//get y offset variable
+			double a = yOffset(trueVals, predVals);
+			for (int j=0; j<predVals.size(); j++) predVals[j] += a;
 
-	//fit to original data
+			//get absolute average error to compare among offsets
+			double tempScore = OffsetScore(trueVals, predVals);
+			if (tempScore < score) {
+				score = tempScore;
+				bestOffset = offset;
+			}
 
+		}
+
+		//find best offset value and associate with respective prediction
+		scores.push_back( score );
+		offsets.push_back( bestOffset );
+	}
+
+	//calculate average prediction weighted by inverse of error
+	double totalScore = 0.0;
+	for (size_t i = 0; i < scores.size(); i++){
+		scores[i] = 1.0/scores[i];
+		totalScore += scores[i];
+	}
+
+	//do the averaging of the considering the offsets of each prediction
+
+	//print with gnuplot somehow
 
 	return 0;
 }
@@ -89,9 +131,11 @@ void readIn(std::vector<double>& fillWithData, std::string fileName){
 
 	std::ifstream read(fileName, std::ifstream::in);
 
+	std::string buff;
+	getline(read, buff, '\n');	//chop off header
 
 	while (!read.eof()){
-		std::string buff;
+
 		getline(read, buff, '\n');
 		if (buff == "") break;
 
@@ -129,3 +173,24 @@ void reverse( std::vector<double>& data ){
 	}
 
 }
+
+double yOffset(std::vector<double> x, std::vector<double> y){
+
+	double sum = 0.0;
+	for (unsigned int i = 0; i < x.size(); i++){
+		sum += x[i] - y[i];
+	}
+	return sum / x.size();
+}
+
+double OffsetScore(std::vector<double> x, std::vector<double> y){
+
+	double sum = 0.0;
+	for (unsigned int i = 0; i < x.size(); i++){
+		double diff = x[i] - y[i];
+		if (diff < 0.0) diff = -diff;	//abs value
+		sum += diff;
+	}
+	return sum / x.size();
+}
+
