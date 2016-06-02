@@ -15,7 +15,7 @@ double average(std::vector<double> data);
 void reverse( std::vector<double>& data );
 double yOffset(std::vector<double> x, std::vector<double> y);
 double OffsetScore(std::vector<double> x, std::vector<double> y);
-
+std::vector<double> getSubVect(const std::vector<double>& vect, int start, int length);
 
 int main() {
 
@@ -40,10 +40,8 @@ int main() {
 
 	std::vector< std::vector<MathVector> > profiles;
 	//analyze all data one subvector at a time
-	for (unsigned int i = 0; i + PROFILE_SIZE < inData.size() + 1; i += 1){
-		std::vector<double>::const_iterator first = inData.begin() + i;
-		std::vector<double>::const_iterator last = inData.begin() + i + PROFILE_SIZE;
-		std::vector<double> section(first, last);
+	for (unsigned int i = 0; i + PROFILE_SIZE <= inData.size(); i += 1){
+		std::vector<double> section = getSubVect(inData, i, PROFILE_SIZE);
 
 		profiles.push_back( DFT::DFT( section ) );
 	}
@@ -173,6 +171,15 @@ void reverse( std::vector<double>& data ){
 	}
 
 }
+
+
+
+std::vector<double> getSubVect(const std::vector<double>& vect, int start, int length){
+	std::vector<double>::const_iterator first = vect.begin() + start;
+	std::vector<double>::const_iterator last = vect.begin() + start + length;
+	return std::vector<double>(first, last);
+}
+
 
 double yOffset(std::vector<double> x, std::vector<double> y){
 
