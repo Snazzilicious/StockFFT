@@ -34,7 +34,7 @@ double Profile::getCos(int index){
 	return coeffs[index][0];
 }
 
-double Profile::getCos(int index){
+double Profile::getSin(int index){
 	return coeffs[index][1];
 }
 

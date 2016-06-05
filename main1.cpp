@@ -14,53 +14,69 @@
 void readIn(std::vector<double>& fillWithData, std::string fileName);
 double average(std::vector<double> data);
 void reverse( std::vector<double>& data );
-double yOffset(std::vector<double> x, std::vector<double> y);
-double OffsetScore(std::vector<double> x, std::vector<double> y);
 std::vector<double> getSubVect(const std::vector<double>& vect, int start, int length);
+void printToFile(std::vector<double> data, Prediction pred, std::string fileName );
+
 
 int main() {
 
 	const unsigned int PROFILE_SIZE = 4;
-	const unsigned int NUM_PREDICTIONS = 100;
+	const unsigned int NUM_PREDICTIONS = 10;
 
 
 	std::string inputFile = "input.txt";
 	std::vector<double> inData;
 	//load in data and reverse
 	readIn(inData, inputFile);
+	std::cout << "ALL DATA ACQUIRED" << std::endl;
+
 	reverse( inData );
 	double avg = average( inData );
+	std::cout << "DATA REVERSED" << std::endl;
 
 	//subtract average
 	for(size_t i=0; i < inData.size(); i++){
 		inData[i] -= avg;
 		//std::cout << inData[i] << std::endl;
 	}
+	std::cout << "AVERAGE SUBTRACTED" << std::endl;
 
 
-
+	std::cout << "STARTING ANALYSIS" << std::endl;
 	std::vector< Profile > profiles;
 	//get a profile from all subsets of the data
 	for (unsigned int i = 0; i + PROFILE_SIZE <= inData.size(); i += 1){
 		std::vector<double> section = getSubVect(inData, i, PROFILE_SIZE);
 		Profile newProf(section);
 		profiles.push_back( newProf );
+		std::cout << i << " DONE" << std::endl;
 	}
+	std::cout << "ANALYSIS DONE" << std::endl;
 
-
+	std::cout << "BUILDING PREDICTIONS" << std::endl;
 
 	std::vector< Prediction > allPredictions;
 	//creates predictions from all of the profiles
 	for (unsigned int i = 0; i < NUM_PREDICTIONS; i++){
 		Prediction newPred( profiles );
-
+		std::cout << i << " BUILT" << std::endl;
+		newPred.fitToData( inData );
 		allPredictions.push_back( newPred );
+		std::cout << i << " FIT" << std::endl;
 	}
+	std::cout << "ALL PREDICTIONS BUILT" << std::endl;
 
-
+	std::cout << "AVERAGING PREDICTIONS" << std::endl;
 	//do the averaging of the considering the offsets of each prediction
+	Prediction final = Prediction::weightedAvg( allPredictions );
+	std::cout << "FITTING FINAL" << std::endl;
+	final.fitToData( inData );
 
-	//print with gnuplot somehow
+	//print then view with soffice
+	std::cout << "PRINTING" << std::endl;
+	printToFile(inData, final, "PRED_OUT.txt");
+	std::cout << "DONE" << std::endl;
+
 
 	return 0;
 }
@@ -123,23 +139,23 @@ std::vector<double> getSubVect(const std::vector<double>& vect, int start, int l
 }
 
 
-double yOffset(std::vector<double> x, std::vector<double> y){
 
-	double sum = 0.0;
-	for (unsigned int i = 0; i < x.size(); i++){
-		sum += x[i] - y[i];
+
+void printToFile(std::vector<double> data, Prediction pred, std::string fileName ){
+
+	std::ofstream write(fileName, std::ifstream::out);
+	unsigned int dataB4Pred = data.size()-pred.getShift();
+	std::vector<double> predData = pred.getValues();
+
+	for (unsigned int i = 0; i < dataB4Pred; i++){
+		write << i << "\t" << data[i] << "\t" << "" << std::endl;
 	}
-	return sum / x.size();
-}
 
-double OffsetScore(std::vector<double> x, std::vector<double> y){
-
-	double sum = 0.0;
-	for (unsigned int i = 0; i < x.size(); i++){
-		double diff = x[i] - y[i];
-		if (diff < 0.0) diff = -diff;	//abs value
-		sum += diff;
+	for (unsigned int i = 0; i < pred.getShift(); i++){
+		write << i+dataB4Pred << "\t" << data[i+dataB4Pred] << "\t" << predData[i] << std::endl;
 	}
-	return sum / x.size();
-}
 
+	for (unsigned int i = pred.getShift(); i < predData.size(); i++){
+		write << i+dataB4Pred << "\t" << "" << "\t" << predData[i] << std::endl;
+	}
+}

@@ -12,13 +12,13 @@
 #include <limits>
 
 
-//std::mt19937_64* gen = 0;
+std::mt19937_64* Prediction::gen = 0;
 
 
 Prediction::Prediction( std::vector<Profile> profiles  ) : shift(0),
 	score( 0.0 )
 {
-
+	//TODO fis this
 	if ( gen == 0 ){
 		gen = new std::mt19937_64( std::time(NULL) );
 	}
@@ -29,8 +29,8 @@ Prediction::Prediction( std::vector<Profile> profiles  ) : shift(0),
 
 	for (unsigned int i = 0; i < profiles[0].size(); i++){
 
-		int cosIndex = dist( gen );
-		int sinIndex = dist( gen );
+		int cosIndex = dist( *gen );
+		int sinIndex = dist( *gen );
 
 		//select sin and cosine coefficients
 		double cosCoeff = profiles[cosIndex].getCos(i);
@@ -90,7 +90,7 @@ void Prediction::fitToData( const std::vector<double>& trueData ){
 
 
 
-double getYOffset(const std::vector<double>& x, const std::vector<double>& y){
+double Prediction::getYOffset(const std::vector<double>& x, const std::vector<double>& y){
 
 	double sum = 0.0;
 	for (unsigned int i = 0; i < x.size(); i++){
