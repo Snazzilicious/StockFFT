@@ -20,11 +20,14 @@ private:
 
 public:
 	Profile();
-	Profile(std::vector<double> data);
+	Profile(const std::vector<double>& data);
 
 	std::vector<double> inverse();
 
 	unsigned int size();
+
+	double getCos(int index);
+	double getSin(int index);
 
 	void addTerm(double cos, double sin);
 

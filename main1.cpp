@@ -4,11 +4,12 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
-#include <random>
 #include <ctime>
 
 #include "DFT.h"
 #include "MathVector.h"
+#include "Profile.h"
+#include "Prediction.h"
 
 void readIn(std::vector<double>& fillWithData, std::string fileName);
 double average(std::vector<double> data);
@@ -38,83 +39,24 @@ int main() {
 
 
 
-	std::vector< std::vector<MathVector> > profiles;
-	//analyze all data one subvector at a time
+	std::vector< Profile > profiles;
+	//get a profile from all subsets of the data
 	for (unsigned int i = 0; i + PROFILE_SIZE <= inData.size(); i += 1){
 		std::vector<double> section = getSubVect(inData, i, PROFILE_SIZE);
-
-		profiles.push_back( DFT::DFT( section ) );
+		Profile newProf(section);
+		profiles.push_back( newProf );
 	}
 
 
-	std::uniform_int_distribution<int> dist(0, profiles.size() );
-	std::mt19937_64 gen( std::time(NULL) );
 
-	std::vector< std::vector<double> > allPredictions;
-
-	//builds random profiles to inverse
+	std::vector< Prediction > allPredictions;
+	//creates predictions from all of the profiles
 	for (unsigned int i = 0; i < NUM_PREDICTIONS; i++){
+		Prediction newPred( profiles );
 
-		std::vector<MathVector> builtProfile;
-
-		for (unsigned int j = 0; j < PROFILE_SIZE; j++){
-			int cosIndex = dist( gen );
-			int sinIndex = dist( gen );
-			//select sin and cosine coefficients
-			MathVector cosSin(2,0.0);
-			cosSin[0] = profiles[cosIndex][j][0];
-			cosSin[1] = profiles[sinIndex][j][1];
-
-			//store them
-			builtProfile.push_back( cosSin );
-		}
-		//stores inverse transform of the constructed profile
-		allPredictions.push_back( DFT::IDFT(builtProfile) );
-		builtProfile.clear();
+		allPredictions.push_back( newPred );
 	}
 
-	std::vector<double> scores;
-	std::vector<int> offsets;
-	//fit allPredictions to original data
-	for (unsigned int i = 0; i < NUM_PREDICTIONS; i++) {
-		//select an offset
-		double score = 0.0;
-		int bestOffset = 5;
-		for (unsigned int offset = 5; offset < PROFILE_SIZE - 5; offset++){
-
-			//get subvectors
-			std::vector<double>::const_iterator Data1 = inData.end();
-			std::vector<double>::const_iterator Data2 = inData.end() - offset;
-			std::vector<double> trueVals(Data1, Data2);
-
-			std::vector<double>::const_iterator Pred1 = allPredictions[i].end();
-			std::vector<double>::const_iterator Pred2 = allPredictions[i].end() - offset;
-			std::vector<double> predVals(Pred1, Pred2);
-
-			//get y offset variable
-			double a = yOffset(trueVals, predVals);
-			for (int j=0; j<predVals.size(); j++) predVals[j] += a;
-
-			//get absolute average error to compare among offsets
-			double tempScore = OffsetScore(trueVals, predVals);
-			if (tempScore < score) {
-				score = tempScore;
-				bestOffset = offset;
-			}
-
-		}
-
-		//find best offset value and associate with respective prediction
-		scores.push_back( score );
-		offsets.push_back( bestOffset );
-	}
-
-	//calculate average prediction weighted by inverse of error
-	double totalScore = 0.0;
-	for (size_t i = 0; i < scores.size(); i++){
-		scores[i] = 1.0/scores[i];
-		totalScore += scores[i];
-	}
 
 	//do the averaging of the considering the offsets of each prediction
 

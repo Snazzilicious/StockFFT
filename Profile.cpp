@@ -10,7 +10,7 @@
 
 Profile::Profile(){};
 
-Profile::Profile(std::vector<double> data){
+Profile::Profile(const std::vector<double>& data){
 	coeffs = DFT::DFT(data);
 }
 
@@ -29,3 +29,12 @@ void Profile::addTerm(double cos, double sin){
 
 	coeffs.push_back( newTerm );
 }
+
+double Profile::getCos(int index){
+	return coeffs[index][0];
+}
+
+double Profile::getCos(int index){
+	return coeffs[index][1];
+}
+
