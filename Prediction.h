@@ -24,7 +24,7 @@ private:
 
 	double getYOffset(const std::vector<double>& x, const std::vector<double>& y);
 	std::vector<double> getSubVect(const std::vector<double>& vect, int start, int length);
-	std::vector<double> addConstant (std::vector<double> vect, double constant);
+	std::vector<double> addConstant (const std::vector<double>& vect, double constant);
 	double avgAbsErr(const std::vector<double>& x, const std::vector<double>& y);
 
 	static int getMaxShift( const std::vector<Prediction>& allPreds );
@@ -34,6 +34,7 @@ private:
 	static std::vector<double> weightedSum(std::vector< std::vector<double> > allValues, std::vector< std::vector<double> > weights);
 
 public:
+	Prediction();
 	Prediction( std::vector<Profile> profiles );
 	Prediction(std::vector<double> useTheseValues);
 	~Prediction();
@@ -47,7 +48,7 @@ public:
 	unsigned int size() const ;
 
 	static Prediction weightedAvg(const std::vector<Prediction>& allPreds);
-
+	Prediction operator=(const Prediction& set);
 
 };
 

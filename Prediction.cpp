@@ -11,19 +11,28 @@
 #include <ctime>
 #include <limits>
 
+#include <iostream>
+#include <exception>
 
 std::mt19937_64* Prediction::gen = 0;
+void printVect(std::vector<double> v);
 
+Prediction::Prediction() : shift(0),
+		score(1.0)
+{
+
+}
 
 Prediction::Prediction( std::vector<Profile> profiles  ) : shift(0),
-	score( 0.0 )
+	score( 1.0 )
 {
-	//TODO fis this
+	//TODO fix this
+
 	if ( gen == 0 ){
 		gen = new std::mt19937_64( std::time(NULL) );
 	}
 
-	std::uniform_int_distribution<int> dist(0, profiles.size() );
+	std::uniform_int_distribution<int> dist(0, profiles.size()-1 );
 
 	Profile builtProfile;
 
@@ -39,42 +48,57 @@ Prediction::Prediction( std::vector<Profile> profiles  ) : shift(0),
 		//store them
 		builtProfile.addTerm( cosCoeff, sinCoeff );
 	}
+
 	values = builtProfile.inverse();
 }
 
 Prediction::Prediction(std::vector<double> useTheseValues) : shift(0),
-		score( 0.0 ),
+		score( 1.0 ),
 		values( useTheseValues )
 {
 
 }
 
 Prediction::~Prediction(){
-	if (gen != 0 ){
+	/* if (gen != 0 ){
 		delete gen;
-	}
+	}*/
 }
 
 
+Prediction Prediction::operator=(const Prediction& set){
+	shift = set.getShift();
+	score = set.getScore();
+	values = set.getValues();
+
+	return *this;
+}
 
 
 void Prediction::fitToData( const std::vector<double>& trueData ){
 
-	const int INIT_SHIFT = 5;
-	const int FINAL_SHIFT = this->size() - 5;
+	const int INIT_SHIFT = 1;
+	const int FINAL_SHIFT = this->size() - 0;
 	double bestScore = std::numeric_limits<double>::max();
 	int bestShift = INIT_SHIFT;
 	double bestYOffset = 0.0;
-
+std::cout << "1" << std::endl;
 	for (int currentShift = INIT_SHIFT; currentShift < FINAL_SHIFT; currentShift++){
+		std::cout << "i=" << currentShift << std::endl;
 		//get subvectors
 		std::vector<double> predVals = getSubVect(values, 0, currentShift);
 		std::vector<double> truVals = getSubVect(trueData, trueData.size()-currentShift, currentShift);
+		std::cout << "retrieved subVects, pred, tru" << std::endl;
+		printVect(predVals);
+		printVect(truVals);
 
 		double yOffset = getYOffset(truVals, predVals);
 		predVals = addConstant(predVals, yOffset);
+		std::cout << "got and added offset: " << yOffset << std::endl;
+		printVect(predVals);
 
 		double currentScore = avgAbsErr(truVals, predVals);
+		std::cout << "Got score: " << currentScore << std::endl;
 
 		if(currentScore < bestScore){
 			bestScore = currentScore;
@@ -83,19 +107,26 @@ void Prediction::fitToData( const std::vector<double>& trueData ){
 		}
 
 	}
-	score = 1.0 / bestScore;
+
+	if (bestScore == 0.0){
+		score = std::numeric_limits<double>::max();
+	}else {
+		score = 1.0 / bestScore;
+	}
 	shift = bestShift;
 	values = addConstant(values, bestYOffset);
+	std::cout << "loop ends" << std::endl;
 }
 
 
 
 double Prediction::getYOffset(const std::vector<double>& x, const std::vector<double>& y){
-
+std::cout << "y-off start" << std::endl;
 	double sum = 0.0;
 	for (unsigned int i = 0; i < x.size(); i++){
 		sum += x[i] - y[i];
 	}
+	std::cout << "y-off stop" << std::endl;
 	return sum / x.size();
 }
 
@@ -128,11 +159,21 @@ std::vector<double> Prediction::getSubVect(const std::vector<double>& vect, int 
 }
 
 
-std::vector<double> Prediction::addConstant (std::vector<double> vect, double constant){
+std::vector<double> Prediction::addConstant (const std::vector<double>& vect, double constant){
+	std::cout << "add start" << std::endl;
 	std::vector<double> returnVect;
+	std::cout << "vect size: " << vect.size() << std::endl;
 	for (unsigned int i = 0; i < vect.size(); i++){
-		returnVect.push_back( vect[i] + constant );
+		double temp = vect[i] + constant;
+		std::cout << i << "th sum: " << temp << std::endl;
+
+		try {
+			returnVect.push_back( temp );
+		} catch (std::exception& e){
+			std::cout << e.what() << std::endl;
+		}
 	}
+	std::cout << "add stop" << std::endl;
 	return returnVect;
 }
 
@@ -223,3 +264,9 @@ std::vector<double> Prediction::weightedSum(std::vector< std::vector<double> > a
 	return finalSum;
 }
 
+void printVect(std::vector<double> v) {
+	for (int i=0; i < v.size(); i++){
+		std::cout << v[i] << "\t" ;
+	}
+	std::cout << std::endl;
+}

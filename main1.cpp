@@ -20,8 +20,8 @@ void printToFile(std::vector<double> data, Prediction pred, std::string fileName
 
 int main() {
 
-	const unsigned int PROFILE_SIZE = 4;
-	const unsigned int NUM_PREDICTIONS = 10;
+	const unsigned int PROFILE_SIZE = 3;
+	const unsigned int NUM_PREDICTIONS = 2;
 
 
 	std::string inputFile = "input.txt";
