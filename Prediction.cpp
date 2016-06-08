@@ -189,82 +189,10 @@ double Prediction::avgAbsErr(const std::vector<double>& x, const std::vector<dou
 
 
 
-Prediction Prediction::weightedAvg(const std::vector<Prediction>& allPreds){
-	int max = getMaxShift(allPreds);
-	int min = getMinShift(allPreds);
-	int predSize = allPreds[0].size();
-	int blockLength = (max-min) + predSize;
+Prediction Prediction::Avg(const std::vector<Prediction>& allPreds){
 
-	std::vector< std::vector<double> > allValues = build0Block( allPreds.size(), blockLength );
-	std::vector< std::vector<double> > weights = allValues;
-
-	//build matrix of values aligned ready for weighted summing
-	for (unsigned int i = 0; i < allPreds.size(); i++){
-		std::vector<double> rowOfValues = allPreds[i].getValues();
-		int rowShift = max - allPreds[i].getShift();
-
-		for (unsigned int j = 0; j < rowOfValues.size(); j++){
-			allValues[i][j + rowShift] = rowOfValues[j];
-			weights[i][j + rowShift] = allPreds[i].getScore();
-		}
-
-	}
-
-	Prediction returnVal( weightedSum(allValues, weights) );
-	return returnVal;
-}
-
-int Prediction::getMaxShift( const std::vector<Prediction>& allPreds ){
-	int max = allPreds[0].getShift();
-	for (unsigned int i = 1; i < allPreds.size(); i++){
-		int temp = allPreds[i].getShift();
-		if (temp > max) max = temp;
-	}
-	return max;
-}
-
-int Prediction::getMinShift( const std::vector<Prediction>& allPreds ){
-	int min = allPreds[0].getShift();
-	for (unsigned int i = 1; i < allPreds.size(); i++){
-		int temp = allPreds[i].getShift();
-		if (temp < min) min = temp;
-	}
-	return min;
 }
 
 
 
-std::vector< std::vector<double> > Prediction::build0Block(int rows, int columns){
-	std::vector<double> row(columns, 0.0);
-	std::vector< std::vector<double> > block(rows, row);
 
-	return block;
-}
-
-
-std::vector<double> Prediction::weightedSum(std::vector< std::vector<double> > allValues, std::vector< std::vector<double> > weights){
-
-	std::vector<double> finalSum;
-
-	for (unsigned int i = 0; i < allValues[0].size(); i++){
-		double sum = 0.0;
-		double totalWeight = 0.0;
-
-		for (unsigned int j = 0; j < allValues.size(); j++){
-
-			totalWeight += weights[j][i];
-			sum += allValues[j][i] * weights[j][i];
-
-		}
-
-		finalSum.push_back( sum / totalWeight );
-	}
-	return finalSum;
-}
-
-void printVect(std::vector<double> v) {
-	for (int i=0; i < v.size(); i++){
-		std::cout << v[i] << "\t" ;
-	}
-	std::cout << std::endl;
-}

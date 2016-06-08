@@ -27,11 +27,11 @@ private:
 	std::vector<double> addConstant (const std::vector<double>& vect, double constant);
 	double avgAbsErr(const std::vector<double>& x, const std::vector<double>& y);
 
-	static int getMaxShift( const std::vector<Prediction>& allPreds );
-	static int getMinShift( const std::vector<Prediction>& allPreds );
+	//static int getMaxShift( const std::vector<Prediction>& allPreds );
+	//static int getMinShift( const std::vector<Prediction>& allPreds );
 
-	static std::vector< std::vector<double> > build0Block(int rows, int columns);
-	static std::vector<double> weightedSum(std::vector< std::vector<double> > allValues, std::vector< std::vector<double> > weights);
+	//static std::vector< std::vector<double> > build0Block(int rows, int columns);
+	//static std::vector<double> weightedSum(std::vector< std::vector<double> > allValues, std::vector< std::vector<double> > weights);
 
 public:
 	Prediction();
@@ -47,7 +47,7 @@ public:
 
 	unsigned int size() const ;
 
-	static Prediction weightedAvg(const std::vector<Prediction>& allPreds);
+	static Prediction Avg(const std::vector<Prediction>& allPreds);
 	Prediction operator=(const Prediction& set);
 
 };
