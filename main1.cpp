@@ -20,15 +20,15 @@ void printToFile(std::vector<double> data, Prediction pred, std::string fileName
 
 int main() {
 
-	const unsigned int PROFILE_SIZE = 3;
-	const unsigned int NUM_PREDICTIONS = 2;
+	const unsigned int PROFILE_SIZE = 30; //must be >= 4
+	const unsigned int NUM_PREDICTIONS = 50;
 
 
-	std::string inputFile = "input.txt";
+	std::string inputFile = "verizon.txt";
 	std::vector<double> inData;
 	//load in data and reverse
 	readIn(inData, inputFile);
-	std::cout << "ALL DATA ACQUIRED" << std::endl;
+	std::cout << "ALL " << inData.size() << " DATA ACQUIRED" << std::endl;
 
 	reverse( inData );
 	double avg = average( inData );
