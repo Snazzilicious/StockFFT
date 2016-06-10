@@ -108,10 +108,12 @@ void Prediction::fitToData( const std::vector<double>& trueData ){
 
 	if (bestScore == 0.0){
 		score = 999;	//hopefully this never really happens
+		std::cout << "It happened" << std::endl;
 	}else {
 		score = 1.0 / bestScore;
 	}
 	shift = bestShift;
+	std::cout << "Best Shift = " << shift << std::endl;
 	values = addConstant(values, bestYOffset);
 	//std::cout << "loop ends" << std::endl;
 }
@@ -263,7 +265,7 @@ std::vector<double> Prediction::weightedSum(std::vector< std::vector<double> > a
 }
 
 void printVect(std::vector<double> v) {
-	for (int i=0; i < v.size(); i++){
+	for (unsigned int i=0; i < v.size(); i++){
 		std::cout << v[i] << "\t" ;
 	}
 	std::cout << std::endl;
