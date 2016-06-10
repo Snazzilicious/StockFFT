@@ -16,6 +16,7 @@
 
 std::mt19937_64* Prediction::gen = 0;
 void printVect(std::vector<double> v);
+int averageShift(std::vector<double> shifts);
 
 Prediction::Prediction() : shift(0),
 		score(1.0)
@@ -200,10 +201,14 @@ Prediction Prediction::weightedAvg(const std::vector<Prediction>& allPreds){
 	std::vector< std::vector<double> > allValues = build0Block( allPreds.size(), blockLength );
 	std::vector< std::vector<double> > weights = allValues;
 
+	std::vector<double> shifts;
+
 	//build matrix of values aligned ready for weighted summing
 	for (unsigned int i = 0; i < allPreds.size(); i++){
 		std::vector<double> rowOfValues = allPreds[i].getValues();
 		int rowShift = max - allPreds[i].getShift();
+
+		shifts.push_back(allPreds[i].getShift() );
 
 		for (unsigned int j = 0; j < rowOfValues.size(); j++){
 			allValues[i][j + rowShift] = rowOfValues[j];
@@ -212,7 +217,14 @@ Prediction Prediction::weightedAvg(const std::vector<Prediction>& allPreds){
 
 	}
 
-	Prediction returnVal( weightedSum(allValues, weights) );
+	int avgShift = averageShift( shifts );
+	std::vector<double> sum1 = weightedSum(allValues, weights);
+	std::vector<double> shiftedSum;
+	for (unsigned int i = (max-avgShift); i < sum1.size(); i++){
+		shiftedSum.push_back( sum1[i] );
+	}
+
+	Prediction returnVal( shiftedSum );
 	return returnVal;
 }
 
@@ -262,6 +274,16 @@ std::vector<double> Prediction::weightedSum(std::vector< std::vector<double> > a
 		finalSum.push_back( sum / totalWeight );
 	}
 	return finalSum;
+}
+
+
+int averageShift(std::vector<double> shifts){
+	double sum = 0.0;
+	for (unsigned int i = 0; i < shifts.size(); i++){
+		sum += shifts[i];
+	}
+	sum /= shifts.size();
+	return (int) sum;
 }
 
 void printVect(std::vector<double> v) {
