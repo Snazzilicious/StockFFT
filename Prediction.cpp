@@ -190,7 +190,22 @@ double Prediction::avgAbsErr(const std::vector<double>& x, const std::vector<dou
 
 
 Prediction Prediction::Avg(const std::vector<Prediction>& allPreds){
+	std::vector<double> sum(allPreds[0].size(), 0.0);
 
+	for (unsigned int i = 0; i < allPreds.size(); i++){
+		std::vector<double> vals = allPreds[i].getValues();
+
+		for (unsigned int j = 0; j < vals.size(); j++){
+			sum[j] += vals[j];
+		}
+
+	}
+
+	for (unsigned int i = 0; i < sum.size(); i++){
+		sum[i] /= allPreds.size();
+	}
+
+	return sum;
 }
 
 

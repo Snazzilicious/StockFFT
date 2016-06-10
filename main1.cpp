@@ -21,7 +21,7 @@ void printToFile(std::vector<double> data, Prediction pred, std::string fileName
 int main() {
 
 	const unsigned int PROFILE_SIZE = 30; //must be >= 4
-	const unsigned int NUM_PREDICTIONS = 50;
+	const unsigned int NUM_PREDICTIONS = 100;
 
 
 	std::string inputFile = "verizon.txt";
@@ -60,7 +60,7 @@ int main() {
 	for (unsigned int i = 0; i < NUM_PREDICTIONS; i++){
 		Prediction newPred( profiles );
 		std::cout << i << " BUILT" << std::endl;
-		newPred.fitToData( inData );
+		//newPred.fitToData( inData );
 		allPredictions.push_back( newPred );
 		std::cout << i << " FIT" << std::endl;
 	}
@@ -68,7 +68,7 @@ int main() {
 
 	std::cout << "AVERAGING PREDICTIONS" << std::endl;
 	//do the averaging of the considering the offsets of each prediction
-	Prediction final = Prediction::weightedAvg( allPredictions );
+	Prediction final = Prediction::Avg( allPredictions );
 	std::cout << "FITTING FINAL" << std::endl;
 	final.fitToData( inData );
 
