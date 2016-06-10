@@ -26,7 +26,7 @@ Prediction::Prediction() : shift(0),
 Prediction::Prediction( std::vector<Profile> profiles  ) : shift(0),
 	score( 1.0 )
 {
-	//TODO fix this
+
 
 	if ( gen == 0 ){
 		gen = new std::mt19937_64( std::time(NULL) );

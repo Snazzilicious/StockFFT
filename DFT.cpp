@@ -13,14 +13,14 @@
 
 std::vector<MathVector> DFT::DFT(std::vector<double> data) {
 
-	int N = data.size();
+	int N = 300;
 
 	std::vector<MathVector> DFT_result;
 
-	for (int n=0; n<N; n++) {
+	for (unsigned int n=0; n<data.size(); n++) {
 		MathVector sum(2, 0.0);
 
-		for (int m=0; m<N; m++){
+		for (unsigned int m=0; m<data.size(); m++){
 
 			MathVector complex(2, 0.0);
 			complex[0] = std::cos( -(2*M_PI*m*n)/N ) ;
@@ -44,14 +44,14 @@ std::vector<MathVector> DFT::DFT(std::vector<double> data) {
 
 std::vector<double> DFT::IDFT(std::vector<MathVector> coeffs) {
 
-	int N = coeffs.size();
+	int N = 300;
 
 	std::vector<double> IDFT_result;
 
-	for (int n=0; n<N; n++) {
+	for (int n=0; n<coeffs.size(); n++) {
 		double sum = 0.0;
 
-		for (int m=0; m<N; m++){
+		for (int m=0; m<coeffs.size(); m++){
 
 			sum += coeffs[m][0] * std::cos( (2*M_PI*m*n)/N ) ;
 			sum += - coeffs[m][1] * std::sin( (2*M_PI*m*n)/N ) ;

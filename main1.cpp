@@ -21,7 +21,7 @@ void printToFile(std::vector<double> data, Prediction pred, std::string fileName
 int main() {
 
 	const unsigned int PROFILE_SIZE = 30; //must be >= 4
-	const unsigned int NUM_PREDICTIONS = 50;
+	const unsigned int NUM_PREDICTIONS = 100;
 
 
 	std::string inputFile = "verizon.txt";
