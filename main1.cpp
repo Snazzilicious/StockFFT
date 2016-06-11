@@ -16,15 +16,15 @@ double average(std::vector<double> data);
 void reverse( std::vector<double>& data );
 std::vector<double> getSubVect(const std::vector<double>& vect, int start, int length);
 void printToFile(std::vector<double> data, Prediction pred, std::string fileName );
+double getPercentChange(Prediction pred);
 
-
-int main() {
+int main(int argc, char *argv[]) {
 
 	const unsigned int PROFILE_SIZE = 30; //must be >= 4
 	const unsigned int NUM_PREDICTIONS = 100;
 
-
-	std::string inputFile = "verizon.txt";
+	std::string argument = argv[1];
+	std::string inputFile = "/home/osboxes/StockData/" + argument; //"verizon.txt";
 	std::vector<double> inData;
 	//load in data and reverse
 	readIn(inData, inputFile);
@@ -49,7 +49,7 @@ int main() {
 		std::vector<double> section = getSubVect(inData, i, PROFILE_SIZE);
 		Profile newProf(section);
 		profiles.push_back( newProf );
-		std::cout << i << " DONE" << std::endl;
+		//std::cout << i << " DONE" << std::endl;
 	}
 	std::cout << "ANALYSIS DONE" << std::endl;
 
@@ -59,10 +59,10 @@ int main() {
 	//creates predictions from all of the profiles
 	for (unsigned int i = 0; i < NUM_PREDICTIONS; i++){
 		Prediction newPred( profiles );
-		std::cout << i << " BUILT" << std::endl;
+		//std::cout << i << " BUILT" << std::endl;
 		newPred.fitToData( inData );
 		allPredictions.push_back( newPred );
-		std::cout << i << " FIT" << std::endl;
+		//std::cout << i << " FIT" << std::endl;
 	}
 	std::cout << "ALL PREDICTIONS BUILT" << std::endl;
 
@@ -71,13 +71,14 @@ int main() {
 	Prediction final = Prediction::weightedAvg( allPredictions );
 	std::cout << "FITTING FINAL" << std::endl;
 	final.fitToData( inData );
-
-	//print then view with soffice
+	double change = getPercentChange( final );
+	//print
 	std::cout << "PRINTING" << std::endl;
-	printToFile(inData, final, "PRED_OUT.txt");
-	std::cout << "DONE" << std::endl;
+	std::ofstream write("/home/osboxes/Predictions/Scores.csv", std::ofstream::out | std::ofstream::app);
+	write << argument << "," << final.getScore() << "," << change << std::endl;
+	printToFile(inData, final, ("/home/osboxes/Predictions/" + argument) );
 
-
+	write.close();
 	return 0;
 }
 
@@ -90,7 +91,8 @@ void readIn(std::vector<double>& fillWithData, std::string fileName){
 	std::string buff;
 	getline(read, buff, '\n');	//chop off header
 
-	while (!read.eof()){
+	for (int i=0; i<300; i++) {
+	//while (!read.eof()){
 
 		getline(read, buff, '\n');
 		if (buff == "") break;
@@ -158,4 +160,11 @@ void printToFile(std::vector<double> data, Prediction pred, std::string fileName
 	for (unsigned int i = pred.getShift(); i < predData.size(); i++){
 		write << i+dataB4Pred << "\t" << "" << "\t" << predData[i] << std::endl;
 	}
+}
+
+
+double getPercentChange(Prediction pred){
+	int startIndex = pred.getShift()-1;
+	double diff = pred.getValues()[ startIndex+5 ] - pred.getValues()[ startIndex ];
+	return diff / pred.getValues()[ startIndex ];
 }

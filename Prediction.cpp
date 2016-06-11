@@ -114,7 +114,7 @@ void Prediction::fitToData( const std::vector<double>& trueData ){
 		score = 1.0 / bestScore;
 	}
 	shift = bestShift;
-	std::cout << "Best Shift = " << shift << std::endl;
+	//std::cout << "Best Shift = " << shift << std::endl;
 	values = addConstant(values, bestYOffset);
 	//std::cout << "loop ends" << std::endl;
 }
